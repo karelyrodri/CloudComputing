@@ -1,0 +1,66 @@
+---
+#############################
+# Launch and Set Up Cloud VMS
+#############################
+- import_playbook: tasks/playbook_launch_cloud_vms.yaml
+- import_playbook: tasks/docker_kubernetes/playbook_ufw_firewall_rules.yaml
+
+######################################
+# Docker and Kubernetes Installations
+######################################
+- import_playbook: tasks/docker_kubernetes/playbook_install_k8_docker_on_local.yaml
+- import_playbook: tasks/docker_kubernetes/playbook_install_docker.yaml
+- import_playbook: tasks/docker_kubernetes/playbook_install_kubernetes.yaml
+
+
+#######################
+# Execute Assignment 3
+#######################
+- import_playbook: tasks/docker_kubernetes/assignment_3/playbook_kubernetes_cluster.yaml
+- import_playbook: tasks/docker_kubernetes/assignment_3/playbook_zookeeper_kafka_deployment_services.yaml
+- import_playbook: tasks/docker_kubernetes/assignment_3/playbook_couchdb_consumer_deployment_services.yaml
+- import_playbook: tasks/playbook_run_producer_shells_on_local_vm.yaml
+
+
+############
+# Clean Up 
+############
+- import_playbook: tasks/docker_kubernetes/playbook_clean_k8_docker.yaml
+
+
+
+
+
+
+
+
+########################
+# Installations for VM1
+########################
+#- import_playbook: tasks/playbook_installations_on_local_vm.yaml
+
+
+#############################
+# Assignmnet 2 Installations
+#############################
+#- import_playbook: tasks/assignment_2/playbook_installations_on_cloud_vms.yaml
+#- import_playbook: tasks/assignment_2/playbook_install_couchdb_on_cloud_vm.yaml
+
+#- import_playbook: tasks/assignment_2/playbook_copy_files_to_cloud_vms.yaml
+
+#- import_playbook: tasks/assignment_2/playbook_ufw_firewall_rules_on_vms.yaml
+
+#######################
+# Execute Assignment 2
+#######################
+#- import_playbook: tasks/assignment_2/playbook_run_kafka_brokers_on_cloud.yaml
+#- import_playbook: tasks/assignment_2/playbook_topics_and_databases_on_cloud_vms.yaml
+#- import_playbook: tasks/assignment_2/playbook_run_producer_shells_on_local_vm.yaml
+
+
+###########################
+# Master Playbook Clean Up 
+###########################
+#- import_playbook: tasks/playbook_master_clean_up.yaml
+
+...

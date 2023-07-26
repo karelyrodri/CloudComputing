@@ -1,0 +1,33 @@
+---
+
+apiVersion: apps/v1
+kind: Deployment        
+metadata:
+  name: couchdb-deployment 
+  namespace: default
+spec:                     
+  replicas: 1           
+  selector:
+    matchLabels:
+      app: couchdb          
+  minReadySeconds: 5  
+                          
+  template:              
+    metadata:
+      labels:
+        app: couchdb        # some label to give to this pod (see the matching label above)
+    spec: 
+      hostname: couchdb-host
+      nodeSelector: 
+        kubernetes.io/hostname:  kr-vm3 
+      containers:
+      - name: couchdb       
+        image: couchdb:latest   # this is the image name on hub.docker               
+        ports:         
+        - containerPort: 5984
+        env: 
+          - name: COUCHDB_USER
+            value: vm2
+          - name: COUCHDB_PASSWORD
+            value: kr
+           

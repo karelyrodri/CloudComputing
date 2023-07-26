@@ -1,0 +1,36 @@
+- hosts: VM1 
+  remote_user: vagrant
+  become: yes
+  tasks:
+  - name: install ansible galaxy docker
+    ansible.builtin.shell: ansible-galaxy collection install community.docker
+  
+  - name: install ansible galaxy  kubernetes
+    ansible.builtin.shell: ansible-galaxy collection install kubernetes.core
+
+  - name: Install python docker and k8 libraries 
+    ansible.builtin.pip:
+      name:
+        - docker
+        - kubernetes
+        - PyYAML
+        - jsonpatch 
+
+- hosts:  MyChameleonVMs 
+  remote_user:  cc   
+  collections:  
+    - openstack.cloud
+
+  become: yes
+  tasks:
+  - name: Install python docker and k8 libraries 
+    ansible.builtin.pip:
+      name:
+        - docker
+        - kubernetes
+        - PyYAML
+        - jsonpatch 
+
+    
+
+    

@@ -1,0 +1,29 @@
+---    
+- hosts: MyChameleonVMs 
+  remote_user:  cc    
+  collections:   
+    - openstack.cloud
+  become: yes       
+  tasks:
+  - name: Enabling the kubernetes package repository 
+    ansible.builtin.shell: sudo apt install -y apt-transport-https ca-certificates curl
+  - name: GPG key 
+    ansible.builtin.shell: sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    args:
+      executable: /bin/bash
+  - name: set up repository 
+    ansible.builtin.shell: echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg]  https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+    args:
+      executable: /bin/bash
+
+  - name: Install kubernetes
+    ansible.builtin.apt:
+      name: 
+        - kubeadm 
+        - kubelet 
+        - kubectl 
+        - kubernetes-cni
+        - jq 
+      update_cache: yes
+
+...

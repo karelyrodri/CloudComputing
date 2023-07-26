@@ -1,0 +1,81 @@
+---
+- hosts: VM2
+  remote_user:  cc    
+  collections:   
+    - openstack.cloud
+ 
+  tasks:
+  - name: Create a Service for couchdb
+    kubernetes.core.k8s:
+      state: present
+      src: ~/couchdb/couchdb-service.yaml
+
+  - name: Create a Deployment for couchdb 
+    kubernetes.core.k8s:
+      state: present
+      src: ~/couchdb/couchdb-deployment.yaml
+
+  - name: wait a for container creation 
+    ansible.builtin.wait_for:
+      timeout: 10
+ 
+  - name: add databse OpenWeatherMap AirQuality Covid-19 to couchdb
+    ansible.builtin.shell: "curl -X PUT http://vm2:kr@129.114.25.56:30006/{{ item }}"
+    loop:
+      - "covid"
+      - "weather"
+      - "air_quality"
+
+
+  ############ consumer deployment/service ############
+
+  - name: Create a Job for consumer
+    kubernetes.core.k8s:
+      state: present
+      src: ~/consumer/consumer-job.yaml
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+############# Things that didnt work 
+  # - name: Build an image and push it to a private repo
+  #   community.docker.docker_image:
+  #     build:
+  #       path: ~/consumer/consumer_dockerfile
+  #     name: 10.56.0.127:5000/consumer-image
+  #     tag: v1
+  #     push: yes
+  #     source: local
+##########
+  # - name:  push consumer image to a private repo
+  #   community.docker.docker_image:
+  #     name: consumer-image
+  #     repository: 10.56.0.127:5000/consumer-image
+  #     tag: v1
+  #     push: yes
+  #     source: local
+
+  # - name: Expose couchdb
+  #   kubernetes.core.k8s_service:
+  #     state: present
+  #     name: couch-db
+  #     namespace: default
+  #     ports:
+  #     - port: 443
+  #       protocol: TCP
+  #     selector:
+  #       key: special
+
+      #rollout 
+
+...

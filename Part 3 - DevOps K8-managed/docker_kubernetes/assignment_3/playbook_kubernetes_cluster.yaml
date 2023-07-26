@@ -1,0 +1,120 @@
+---
+- hosts: MyChameleonVMs 
+  remote_user:  cc    
+  collections:   
+    - openstack.cloud
+  become: yes       
+  tasks:
+  - name: kubernetes turn swap off 
+    ansible.builtin.shell: sudo swapoff -a
+
+
+  - name: Copy config.toml to file from local to remote VM2
+    ansible.builtin.copy:
+      src: ~/config.toml
+      dest: /etc/containerd/config.toml
+    become: yes
+    
+  - name: restart containerd
+    ansible.builtin.shell: sudo systemctl restart containerd 
+  
+
+- hosts: VM2
+  remote_user:  cc    
+  collections:   
+    - openstack.cloud
+ 
+  tasks:
+  - name: kubeadm init 
+    ansible.builtin.shell: sudo kubeadm init --node-name kubemaster --pod-network-cidr=10.244.0.0/16
+
+  - name: master node .kube directory
+    become_user: cc
+    ansible.builtin.file: 
+      path: /home/cc/.kube
+      state: directory
+  
+  - name: copy admin.conf to .kube
+    ansible.builtin.copy:
+      src: /etc/kubernetes/admin.conf
+      dest: /home/cc/.kube/config
+      remote_src: yes 
+    become: yes  
+
+  - name: chown command
+    become_user: cc
+    ansible.builtin.shell: sudo chown cc:cc /home/cc/.kube/config
+
+
+  - name: get flannel from github
+    ansible.builtin.get_url:
+      url: https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+      dest: ~/kube-flannel.yml
+
+  - name: apply flannel to cluster
+    kubernetes.core.k8s:
+      state: present
+      src: ~/kube-flannel.yml
+
+  ######## Add VM3 to VM2 cluser ##########
+
+  - name: create token and store in file 
+    ansible.builtin.shell: kubeadm token create --print-join-command > ~/token.txt
+
+  - name: save token file to VM1 
+    ansible.builtin.fetch: 
+      src: ~/token.txt
+      dest: ~/token.txt
+      
+- hosts: VM3
+  remote_user:  cc    
+  collections:   
+    - openstack.cloud
+    
+  tasks:
+  - name: copy token to VM3
+    ansible.builtin.copy:
+      src: ~/token.txt/129.114.26.14/home/cc/token.txt
+      dest: ~/token
+
+  # - name: Add node name to join token command
+  #   ansible.builtin.lineinfile:
+  #     path: /home/cc/token
+  #     line: "--node-name kubeworker2" 
+
+  - name: run command to join VM3 to VM2 cluster 
+    ansible.builtin.shell: sudo sh ~/token
+    
+
+  - name: wait a second
+    ansible.builtin.wait_for:
+      timeout: 2
+
+# ######## taint master to become worker node ##########  
+
+- hosts: VM2
+  remote_user:  cc    
+  collections:   
+    - openstack.cloud
+   
+  tasks:  
+  - name: Taint node control-plane and master 
+    kubernetes.core.k8s_taint:
+      state: present 
+      name: kubemaster
+      taints:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/control-plane
+      
+
+  - name: taint kube master shell, module wasnt taking effect 
+    ansible.builtin.shell: "kubectl taint nodes kubemaster node-role.kubernetes.io/{{ item }}:NoSchedule-"  
+    loop: 
+      - "master"
+      - "control-plane"
+
+    
+
+...

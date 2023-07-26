@@ -1,0 +1,52 @@
+- hosts: VM2
+  remote_user:  cc    
+  collections:   
+    - openstack.cloud
+  become: yes 
+  tasks:
+  - name: delete ~/.kube
+    ansible.builtin.shell: sudo rm -r ~/.kube
+
+
+- hosts: MyChameleonVMs 
+  remote_user:  cc    
+  collections:   
+    - openstack.cloud
+  become: yes       
+  tasks:
+
+  - name: restart containerd
+    ansible.builtin.shell: sudo systemctl restart containerd 
+    
+  - name: reset cluster 
+    ansible.builtin.shell: sudo kubeadm reset
+
+  - name: delete /etc/cni/net.d/
+    ansible.builtin.shell: sudo rm -r /etc/cni/net.d/
+
+
+
+  - name: uninstall kubernetes
+    ansible.builtin.apt:
+      name: 
+        - kubeadm 
+        - kubelet 
+        - kubectl 
+        - kubernetes-cni
+        - jq 
+      update_cache: yes
+      state: absent 
+
+  
+  - name: uninstall docker 
+    ansible.builtin.apt:
+      name: 
+        - docker-ce 
+        - docker-ce-cli 
+        - containerd.io 
+        - docker-compose-plugin
+      update_cache: yes
+      state: absent 
+
+
+  

@@ -1,0 +1,31 @@
+- hosts:  MyChameleonVMs 
+  remote_user:  cc   
+  collections:  
+    - openstack.cloud
+  become: yes
+  tasks:
+  - name: ufw rules
+    ufw:
+      rule: allow
+      port: '{{ item }}'
+      proto: any
+    loop:
+      - 6443
+      - 8285
+      - 8472
+      - 443
+      - 2379
+      - 2380
+      - 10250
+      - 10251
+      - 10252
+      - 30000
+      - 30001
+      - 30002
+      - 30003
+      - 30004
+      - 30005
+      - 30006
+      - 22
+     
+

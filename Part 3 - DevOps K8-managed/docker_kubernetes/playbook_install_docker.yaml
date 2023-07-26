@@ -1,0 +1,45 @@
+---
+   
+- hosts: MyChameleonVMs 
+  remote_user:  cc    
+  collections:   
+    - openstack.cloud
+  become: yes     
+  tasks:
+  - name: Enabling the Docker package repository 
+    ansible.builtin.shell: sudo apt-get install ca-certificates curl gnupg lsb-release
+  - name: make directory key rings 
+    ansible.builtin.shell: sudo mkdir -p /etc/apt/keyrings
+  - name: GPG key 
+    ansible.builtin.shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    args:
+      executable: /bin/bash
+  - name: set up repository 
+    ansible.builtin.shell: echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu focal stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    args:
+      executable: /bin/bash
+
+  - name: Install docker 
+    ansible.builtin.apt:
+      name: 
+        - docker-ce 
+        - docker-ce-cli 
+        - containerd.io 
+        - docker-compose-plugin
+      update_cache: yes
+
+  - name: Replace a localhost entry searching for a literal string to avoid escaping
+    ansible.builtin.lineinfile:
+      path: /lib/systemd/system/docker.service
+      search_string: 'ExecStart='
+      line: ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --exec-opt native.cgroupdriver=systemd
+      owner: root
+      group: root
+    
+  - name: daemon reload
+    ansible.builtin.shell: sudo systemctl daemon-reload
+
+  - name: restart docker
+    ansible.builtin.shell: sudo systemctl restart docker  
+
+...
