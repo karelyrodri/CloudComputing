@@ -1,0 +1,65 @@
+---
+- hosts: VM3   # VM3
+  remote_user:  cc   
+  collections:   
+    - openstack.cloud
+  become: yes 
+  tasks:
+  
+  - name: Enabling the Apache CouchDB package repository 1
+    ansible.builtin.shell: sudo apt install -y curl apt-transport-https gnupg
+  - name: Enabling the Apache CouchDB package repository 2
+    ansible.builtin.shell: curl https://couchdb.apache.org/repo/keys.asc | gpg --dearmor | sudo tee /usr/share/keyrings/couchdb-archive-keyring.gpg >/dev/null 2>&1
+    args:
+      executable: /bin/bash
+  - name: Enabling the Apache CouchDB package repository 3
+    ansible.builtin.shell: . /etc/os-release
+  - name: Enabling the Apache CouchDB package repository 4
+    ansible.builtin.shell: echo "deb [signed-by=/usr/share/keyrings/couchdb-archive-keyring.gpg] https://apache.jfrog.io/artifactory/couchdb-deb/ focal main" | sudo tee /etc/apt/sources.list.d/couchdb.list >/dev/null
+    args:
+      executable: /bin/bash
+
+
+  - name: debian non interactive 
+    ansible.builtin.shell: export DEBIAN_FRONTEND=noninteractive
+
+  - name: Install debconf
+    ansible.builtin.apt:
+      name: 
+        - debconf
+        - debconf-utils
+  
+  - name: Preconfigure couchdb
+    debconf:
+      name: couchdb
+      question: '{{ item.question }}'
+      value: '{{ item.value }}'
+      vtype: '{{ item.vtype }}'    
+    with_items: 
+      - {question: 'couchdb/adminpass_again', value: 'KR', vtype: 'password'}
+      - {question: 'couchdb/adminpass', value: 'KR', vtype: 'password'}
+      - {question: 'couchdb/mode', value: 'standalone', vtype: 'select'}
+      - {question: 'couchdb/postrm_remove_databases', value: 'false', vtype: 'boolean'}
+      - {question: 'couchdb/cookie', value: 'kr', vtype: 'string'}
+      - {question: 'couchdb/nodename', value: 'couchdb@localhost', vtype: 'string'}
+      - {question: 'couchdb/bindaddress', value: '0.0.0.0', vtype: 'string'}      
+
+
+  - name: Install couchdb
+    ansible.builtin.apt:
+      name: couchdb
+      update_cache: true
+    become: yes 
+
+  - name: copy old local.ini
+    copy:
+        src: ~/couchdb/local.ini
+        dest: /opt/couchdb/etc/local.ini
+        mode: u=rwX,g=rX,o=rX
+
+  
+  - name: restart couchdb
+    ansible.builtin.shell: sudo systemctl restart couchdb
+   
+
+...

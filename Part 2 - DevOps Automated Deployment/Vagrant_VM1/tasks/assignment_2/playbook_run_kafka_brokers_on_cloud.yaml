@@ -1,0 +1,62 @@
+---
+- hosts: MyChameleonVMs
+  remote_user:  cc   
+  collections:  
+    - openstack.cloud
+  become: yes
+  tasks:
+  #- name: remove permissions on directory 
+   # ansible.builtin.shell: sudo chmod -R 700 /home/cc/kafka
+
+  - name: remove zookeeper and kafka files 
+    ansible.builtin.shell: rm -fr /tmp/zookeeper/ /tmp/kafka* 
+
+- hosts: VM2 #VM2
+  remote_user:  cc   
+  collections:  
+    - openstack.cloud
+  become: yes
+  tasks:
+  - name: start zookeeper
+    ansible.builtin.shell: /home/cc/kafka/bin/zookeeper-server-start.sh /home/cc/kafka/config/zookeeper.properties
+    async: 800
+    poll:  0
+
+- hosts: MyChameleonVMs
+  remote_user:  cc   
+  collections:  
+    - openstack.cloud
+  become: yes
+  tasks:
+  - name: start kafka brokers 
+    ansible.builtin.shell: /home/cc/kafka/bin/kafka-server-start.sh /home/cc/kafka/config/server.properties
+    async: 800
+    poll: 0 
+
+  - name: wait for kafka brokers to finish starting 
+    ansible.builtin.wait_for:
+      timeout: 8
+
+- hosts: VM2
+  remote_user:  cc   
+  collections:  
+    - openstack.cloud
+  become: yes
+  tasks:
+  - name: start consumer
+    ansible.builtin.shell: python3 /home/cc/consumer.py
+    async: 800
+    poll: 0 
+  - name: wait a second
+    ansible.builtin.wait_for:
+      timeout: 200
+
+  
+
+...
+
+
+
+
+    
+   

@@ -1,0 +1,19 @@
+---
+- hosts: VM1  
+  remote_user: vagrant
+  collections:  
+    - openstack.cloud
+  become: yes 
+  tasks:
+    - name: Delete chameleon instance for VM2
+      openstack.cloud.server:
+        state: absent
+        cloud: openstack
+        name: KR_VM2
+
+    - name: delete chameleon instance for VM3
+      openstack.cloud.server:
+        state: absent
+        cloud: openstack
+        name: KR_VM3
+...

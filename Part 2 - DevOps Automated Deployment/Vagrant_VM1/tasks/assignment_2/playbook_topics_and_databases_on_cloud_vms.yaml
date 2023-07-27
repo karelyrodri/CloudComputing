@@ -1,0 +1,29 @@
+---
+- hosts: VM2 #VM2
+  remote_user:  cc   
+  collections:  
+    - openstack.cloud
+  become: yes   
+  tasks:
+  
+  - name: add topics OpenWeatherMap AirQuality Covid-19 to brokers 
+    ansible.builtin.shell: "/home/cc/kafka/bin/kafka-topics.sh --create --topic {{ item }} --bootstrap-server localhost:9092"
+    loop:
+      - "OpenWeatherMap"
+      - "AirQuality"
+      - "Covid-19"
+
+- hosts: VM3   # VM3
+  remote_user:  cc   
+  collections:   
+    - openstack.cloud
+  become: yes 
+  tasks:
+
+  - name: add databse OpenWeatherMap AirQuality Covid-19 to couchdb
+    ansible.builtin.shell: "curl -X PUT http://admin:KR@127.0.0.1:5984/{{ item }}"
+    loop:
+      - "covid"
+      - "weather"
+      - "air_quality"
+...

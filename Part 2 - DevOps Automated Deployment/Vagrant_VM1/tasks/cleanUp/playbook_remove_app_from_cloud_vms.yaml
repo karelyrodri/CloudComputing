@@ -1,0 +1,32 @@
+---
+
+- hosts: VM2 # VM2
+  remote_user:  cc   
+  collections:  
+    - openstack.cloud
+  become: yes
+  tasks:
+  - name: ninstall python couchdb 
+    ansible.builtin.pip: 
+      name: 
+        #- pycouchdb  
+        - kafka-python
+        #- requests
+      state: absent
+
+
+- hosts: MyChameleonVMs  # machines on whom the action is performed
+  remote_user:  cc    # change username depending on what it is on the cloud
+  collections:   # this is new starting with Ansible 2.9 (akin to importing package)
+    - openstack.cloud
+ 
+  tasks:
+  - name: Uninstall python3 and java jdk using apt-get
+    ansible.builtin.apt: 
+      name: 
+        - python3-pip
+        - default-jdk
+      state: absent 
+    become: yes
+
+...

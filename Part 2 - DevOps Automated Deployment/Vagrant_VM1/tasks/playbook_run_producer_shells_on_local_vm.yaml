@@ -1,0 +1,32 @@
+---
+- hosts: VM1
+  remote_user: vagrant  
+  tasks:
+  - name: start producer for weather data
+    ansible.builtin.shell: python3 ~/kafka/python.py 1
+    async: 300
+    poll:  0
+    
+  - name: wait a second
+    ansible.builtin.wait_for:
+      timeout: 2
+
+  - name: start producer for air quality data
+    ansible.builtin.shell: python3 ~/kafka/consumer.py 2
+    async: 300
+    poll:  0
+   
+  - name: wait a second
+    ansible.builtin.wait_for:
+      timeout: 2
+
+  - name: start producer for covid data
+    ansible.builtin.shell: python3 ~/kafka/consumer.py 3
+    async: 300
+    poll:  0
+
+  - name: wait for producers to finish 
+    ansible.builtin.wait_for:
+      timeout: 15
+    
+...

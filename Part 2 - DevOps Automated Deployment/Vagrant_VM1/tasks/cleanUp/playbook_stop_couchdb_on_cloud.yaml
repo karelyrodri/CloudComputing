@@ -1,0 +1,25 @@
+---
+- hosts: VM3   # VM3
+  remote_user:  cc   
+  collections:   
+    - openstack.cloud
+  become: yes 
+  tasks:
+
+  - name: delete databse OpenWeatherMap AirQuality Covid-19 to couchdb
+    ansible.builtin.shell: "curl -X DELETE http://admin:KR@127.0.0.1:5984/{{ item }}"
+    loop:
+      - "covid"
+      - "weather"
+      - "air_quality"
+
+  - name: stop couchdb
+    ansible.builtin.shell: sudo systemctl stop couchdb
+
+  - name: uninstall couchdb
+    ansible.builtin.apt:
+      name: couchdb
+      state: absent
+
+
+...

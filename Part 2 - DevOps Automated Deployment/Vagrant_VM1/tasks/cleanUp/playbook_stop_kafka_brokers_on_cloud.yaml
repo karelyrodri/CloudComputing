@@ -1,0 +1,37 @@
+---
+- hosts: VM2 #VM2
+  remote_user:  cc   
+  collections:  
+    - openstack.cloud
+  become: yes
+  tasks:
+  - name: remove topics OpenWeatherMap AirQuality Covid-19 on brokers 
+    ansible.builtin.shell: "/home/cc/kafka/bin/kafka-topics.sh --delete --topic {{ item }} --bootstrap-server localhost:9092"
+    loop:                                 
+      - "OpenWeatherMap"
+      - "AirQuality"
+      - "Covid-19"
+
+- hosts: MyChameleonVMs
+  remote_user:  cc   
+  collections:  
+    - openstack.cloud
+  become: yes
+  tasks:
+  - name: stop kafka brokers 
+    ansible.builtin.shell: /home/cc/kafka/bin/kafka-server-stop.sh /home/cc/kafka/config/server.properties
+
+
+- hosts: VM2 #VM2
+  remote_user:  cc   
+  collections:  
+    - openstack.cloud
+  become: yes
+  tasks:
+  - name: stop zookeeper
+    ansible.builtin.shell: /home/cc/kafka/bin/zookeeper-server-stop.sh /home/cc/kafka/config/zookeeper.properties
+
+...
+
+
+

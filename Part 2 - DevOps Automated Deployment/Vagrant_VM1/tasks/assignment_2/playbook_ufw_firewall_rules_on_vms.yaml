@@ -1,0 +1,41 @@
+---
+- hosts: VM1  
+  remote_user: vagrant
+  become: yes      
+  tasks:
+
+  - name: VM1 ufw rules kafka
+    ufw:
+      direction: out
+      rule: allow
+      port: 9092
+      proto: any
+
+- hosts:  MyChameleonVMs 
+  remote_user:  cc   
+  collections:  
+    - openstack.cloud
+  become: yes
+  tasks:
+  - name: ufw rules kafka
+    ufw:
+      rule: allow
+      port: 9092
+      proto: any
+
+  - name: ufw rules zookeeper
+    ufw:
+      rule: allow
+      port: 2181
+      proto: any
+
+  - name:  ufw rules couchdb
+    ufw:
+      rule: allow
+      port: 5984
+      proto: any
+
+
+
+
+...

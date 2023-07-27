@@ -1,0 +1,37 @@
+---
+
+- hosts: VM2 # VM2 
+  remote_user:  cc   
+  collections:  
+    - openstack.cloud
+  
+  tasks:
+  - name: Copy a consumer.py file from local to remote
+    copy:
+        src: ~/kafka/consumer.py  
+        dest: /home/cc/   
+
+  #- name: Copy a private key file from local to remote
+   # copy:
+    #    src: ~/.ssh/KRodriguez_key.pem   
+     #   dest: /home/cc/.ssh/KRodriguez_key.pem 
+
+  - name: Copy server.properties to file from local to remote VM2
+    copy:
+        src: ~/kafka/server_VM2.properties 
+        dest: /home/cc/kafka/config/server.properties
+
+
+- hosts: VM3 # VM3
+  remote_user:  cc   
+  collections:  
+    - openstack.cloud
+  
+  tasks:
+  - name: Copy server.properties to file from local to remote VM3
+    copy:
+        src: ~/kafka/server_VM3.properties 
+        dest: /home/cc/kafka/config/server.properties
+
+        
+...

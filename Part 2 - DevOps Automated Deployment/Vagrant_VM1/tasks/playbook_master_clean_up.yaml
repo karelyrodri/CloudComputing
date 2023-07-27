@@ -1,0 +1,13 @@
+---
+
+###############
+# Clean Up VMS
+###############
+- import_playbook: cleanUp/playbook_stop_kafka_brokers_on_cloud.yaml
+- import_playbook: cleanUp/playbook_stop_couchdb_on_cloud.yaml
+- import_playbook: cleanUp/playbook_remove_app_from_cloud_vms.yaml
+- import_playbook: cleanUp/playbook_teardown_cloud_vms.yaml
+- import_playbook: cleanUp/playbook_remove_app_from_local_vm.yaml
+
+
+...

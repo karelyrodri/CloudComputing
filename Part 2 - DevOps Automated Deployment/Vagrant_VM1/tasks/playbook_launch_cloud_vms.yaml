@@ -1,0 +1,44 @@
+---
+- hosts: VM1 
+  remote_user: vagrant
+  collections:  
+    - openstack.cloud
+  
+  tasks:
+    - name: launch chameleon instance for VM2
+      openstack.cloud.server:
+        state: present
+        cloud: openstack
+        name: KR_VM2
+        availability_zone: nova
+        image: CC-Ubuntu20.04
+        key_name: KRodriguez_key
+        flavor: m1.medium
+        security_groups: 
+          - default
+          - SHARED-CLOUDCOMPUTING
+          - HTTP_HTTPS_INGRESS_EGRESS
+          - KUBERNETES_PORTS
+        network: sharednet1
+        floating_ips: 
+          - 129.114.26.14
+
+    - name: launch chameleon instance for VM3
+      openstack.cloud.server:
+        state: present
+        cloud: openstack
+        name: KR_VM3
+        availability_zone: nova
+        image: CC-Ubuntu20.04
+        key_name: KRodriguez_key
+        flavor: m1.small
+        security_groups: 
+          - default
+          - SHARED-CLOUDCOMPUTING
+          - HTTP_HTTPS_INGRESS_EGRESS
+          - KUBERNETES_PORTS
+        network: sharednet1
+        floating_ips: 
+          - 129.114.25.56
+
+...
